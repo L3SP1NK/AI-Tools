@@ -1,0 +1,21 @@
+#!/bin/bash
+question=$(rofi -dmenu -p "🤖 Ask ChatGPT:")
+
+if [ -z "${question}" ]; then
+	exit 1
+fi
+
+response=$(echo "${question}"|gpt_prompt)
+
+if [ -z "${response}" ]; then
+	exit 1
+fi
+
+appname='ChatGPT:'
+urgency='normal'
+
+notify-send \
+	--urgency "${urgency}" \
+	--transient \
+	-i " " \
+	 "🧠> ${question}:" "🤖< ${response}"
