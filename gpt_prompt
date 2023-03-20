@@ -19,7 +19,7 @@ prompt_text="${1:-$(cat /dev/stdin)}"
 prompt_text=$(echo "${prompt_text}"|tr -d \"\'|tr -cd '[:print:]')
 
 role='system'
-role_content='You are a helpful assistant.'
+role_content='You are a helpful assistant, and you provide short and useful answer in a popup notification.'
 temp="0"
 max_tokens="1000"
 model="text-davinci-003"
