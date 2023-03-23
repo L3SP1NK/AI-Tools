@@ -12,13 +12,3 @@ if [ -z "${response}" ]; then
 fi
 
 notify-send "${response}"
-
-appname='ChatGPT:'
-urgency='normal'
-
-#notify-send \
-#	--urgency "${urgency}" \
-#	--transient \
-#	-i " " \
-#	 "🧠> ${question}:" "🤖< ${response}"
-
