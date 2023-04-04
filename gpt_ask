@@ -1,5 +1,12 @@
 #!/bin/bash
-question=$(rofi -dmenu -p "🤖 Ask ChatGPT:")
+
+if ! which gpt_prompt>/dev/null; then
+    echo "gpt prompt not found!"
+    exit 1
+fi
+
+dmenucmd='rofi -dmenu'
+question=$(${dmenucmd} -p "🤖 Ask ChatGPT:")
 
 if [ -z "${question}" ]; then
 	exit 1
