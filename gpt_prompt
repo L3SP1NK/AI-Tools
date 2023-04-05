@@ -1,30 +1,47 @@
 #!/bin/bash
+
 api_endpoint='completions'
 api_url="https://api.openai.com/v1/${api_endpoint}"
 api_key_file="${HOME}/.api/openai.txt"
-[[ ! -e "${api_key_file}" ]]&&{ echo "API key not found!";exit 1; }
+api_key="$( <"${api_key_file}" )"
 
-api_key="$(<"${api_key_file}")"
-[[ -z "${api_key}" ]]&&{ echo "API key not found!";exit 1; }
+if [[ ! -e "${api_key_file}" || -z  "${api_key}" ]]
+    then
+        echo "API key not found!"
+        exit 1
+fi
 
-requirements=(jq curl)
-for requirement in "${requirements[@]}";do
-	if ! which "${requirement}">/dev/null;then
-		echo "${requirement} not found!";exit 1
-	fi
+requirements=( jq curl )
+
+for requirement in "${requirements[@]}"
+    do
+    	if ! which "${requirement}">/dev/null
+            then
+	    	    echo "${requirement} not found!"
+                exit 1
+	    fi
 done
 
-prompt_text="${1:-$(cat /dev/stdin)}"
-[[ -z ${prompt_text} ]]&&{ echo "No prompt submitted!";exit 1; }
-prompt_text=$(echo "${prompt_text}"|tr -d \"\'|tr -cd '[:print:]')
+prompt_text="${1:-$( cat /dev/stdin )}"
 
-role='system'
+if [[ -z ${prompt_text} ]]
+    then
+        echo "No prompt submitted!"
+        exit 1
+fi
+
+prompt_text=$( echo "${prompt_text}" | tr -d \"\' | tr -cd '[:print:]' )
+
 role_content='You are a helpful assistant, and you provide short and useful answer in a popup notification.'
-temp="0"
-max_tokens="1000"
-model="text-davinci-003"
-prompt_request='{"prompt":"'${prompt_text}'", "model":"'${model}'", "temperature": '${temp}', "max_tokens": '${max_tokens}'}'
+
 timeout='30'
+role='system'
+temp="0"                    ## ?
+max_tokens="1000"           ## max chars.
+model="text-davinci-003"    ## -> 3.5?
+
+prompt_request='{"prompt":"'${prompt_text}'", "model":"'${model}'", "temperature": '${temp}', "max_tokens": '${max_tokens}'}'
+
 prompt_response=$(\
 	timeout ${timeout}\
 	curl -s -X POST\
@@ -32,9 +49,14 @@ prompt_response=$(\
 		-H "Authorization: Bearer ${api_key}"\
 		-H "'"role": "${role}", "content": "${role_content}"'"\
 		-d "${prompt_request}" "${api_url}"\
-	|jq -r '.choices[0].text'\
-	|tail -n +3 2>/dev/null
-)
+	| jq -r '.choices[0].text'\
+	| tail -n +3 2>/dev/null
+ )
 
-[[ -z "${prompt_response}" || "${prompt_response}" == 'null' ]]&& { echo "No response receveid from ChatGPT!";exit 1; }
+if [[ -z "${prompt_response}" ||  "${prompt_response}" == 'null' ]]
+    then
+        echo "No response receveid from ChatGPT!"
+        exit 1
+fi
+
 echo "${prompt_response}"
