@@ -1,2 +1,2 @@
 # OpenAI_tools
-Set of tools to interact with the OpenAI API.
+Set of scripts to interact with the OpenAI API.
