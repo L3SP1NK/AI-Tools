@@ -5,26 +5,25 @@
 
 set -euxo pipefail
 
-local prompt_input="${1:-$( < /dev/stdin )}"  ## get args or read stdin.
-local prompt_input="${prompt_input@Q}"        ## filter input
+prompt_input="${1:-$( < /dev/stdin )}"  ## get args or read stdin.
+prompt_input="${prompt_input@Q}"        ## filter input
 
-local api_key_file="${HOME}/.api/openai.txt"
-local api_key="$( < "${api_key_file}" )"
-local api_endpoint='completions'
-local api_url="https://api.openai.com/v1/${api_endpoint}"
+api_key_file="${HOME}/.api/openai.txt"
+api_key="$( < "${api_key_file}" )"
+api_endpoint='completions'
+api_url="https://api.openai.com/v1/${api_endpoint}"
 
 #_role_content='You are a helpful assistant, and you provide short and useful answer.'
 
-local request_timeout='30'
-local response_echo='true'                ## show the prompt in response
-local prompt_temp='0'                     ## 2 = random, 0 = focused
-local response_max_tokens='4096'          ## max chars to generate
-local prompt_model='text-davinci-003'
+request_timeout='30'
+response_echo='true'                ## show the prompt in response
+prompt_temp='0'                     ## 2 = random, 0 = focused
+response_max_tokens='4096'          ## max chars to generate
+prompt_model='text-davinci-003'
 
-local prompt_request='{"prompt":"'${prompt_input}'","model": "'${prompt_model}'", "temperature": "'${prompt_temp}'", "max_tokens": "'${response_max_tokens}'", "echo": "'${response_echo}'"}'
+prompt_request='{"prompt":"'${prompt_input}'","model": "'${prompt_model}'", "temperature": "'${prompt_temp}'", "max_tokens": "'${response_max_tokens}'", "echo": "'${response_echo}'"}'
 
-local response=$\
-(\
+response=$(\
     timeout "${request_timeout}"\
     curl --silent --fail\
         -X POST\
@@ -33,8 +32,7 @@ local response=$\
         -d "${prompt_request}" "${api_url}"\
 )
 
-local response_text=$\
-(\
+response_text=$(\
     echo "${response}"\
         | jq -r '.choices[0].text'\
         | tail -n +3 2>/dev/null\

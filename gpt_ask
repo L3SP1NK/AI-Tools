@@ -2,13 +2,14 @@
 
 set -euxo pipefail
 
-local dmenucmd='rofi -dmenu'
-local question=$(${dmenucmd} -p "🤖 Ask ChatGPT:")
+dmenucmd='rofi -dmenu'
+question=$(${dmenucmd} -p "🤖 Ask ChatGPT:")
 
 if [[ -z "${question}" ]]; then
     exit 1
 fi
 
-local response=$(echo "${question}" | gpt_prompt || { notify-send "No response from ChatGPT!"; exit 1; })
+response=$(echo "${question}" | gpt_prompt || { notify-send "No response from ChatGPT!"; exit 1; })
 
 notify-send "${response}"
+. shunit2
