@@ -8,28 +8,32 @@ set -euxo pipefail
 prompt_input="${1:-$( < /dev/stdin )}"  ## get args or read stdin.
 prompt_input="${prompt_input@Q}"        ## filter input
 
-api_key_file="${HOME}/.api/openai.txt"
-api_key="$( < "${api_key_file}" )"
-api_endpoint='completions'
-api_url="https://api.openai.com/v1/${api_endpoint}"
+checkEnv() {
+    declare -r api_key_file="${HOME}/.api/openai.txt"
+    declare -gr api_key="$(<"${api_key_file}")"
+    declare -r api_endpoint='completions'
+    declare -gr api_url="https://api.openai.com/v1/${api_endpoint}"
+}
+checkEnv
 
-#_role_content='You are a helpful assistant, and you provide short and useful answer.'
-
-request_timeout='30'
-response_echo='true'                ## show the prompt in response
-prompt_temp='0'                     ## 2 = random, 0 = focused
-response_max_tokens='4096'          ## max chars to generate
-prompt_model='text-davinci-003'
-
-prompt_request='{"prompt":"'${prompt_input}'","model": "'${prompt_model}'", "temperature": "'${prompt_temp}'", "max_tokens": "'${response_max_tokens}'", "echo": "'${response_echo}'"}'
+promptOpt() {
+    declare -r _role_content='You are a helpful assistant, and you provide short and useful answer.'
+    declare -gr -i request_timeout='30'
+    declare -r response_echo='true'                ## show the prompt in response
+    declare -r prompt_temp='0'                     ## 2 = random, 0 = focused
+    declare -r response_max_tokens='4096'          ## max chars to generate
+    declare -r prompt_model='text-davinci-003'
+    declare -gr prompt_request='{"prompt":"'${prompt_input}'","model": "'${prompt_model}'", "temperature": "'${prompt_temp}'", "max_tokens": "'${response_max_tokens}'", "echo": "'${response_echo}'"}'
+}
+promptOpt
 
 response=$(\
     timeout "${request_timeout}"\
-    curl --silent --fail\
-        -X POST\
-        -H "Content-Type: application/json"\
-        -H "Authorization: Bearer ${api_key}"\
-        -d "${prompt_request}" "${api_url}"\
+        curl --silent --fail\
+            -X POST\
+            -H "Content-Type: application/json"\
+            -H "Authorization: Bearer ${api_key}"\
+            -d "${prompt_request}" "${api_url}"\
 )
 
 response_text=$(\
