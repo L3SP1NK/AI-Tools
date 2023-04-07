@@ -1,21 +1,14 @@
 #!/bin/bash
 
-if ! which gpt_prompt>/dev/null; then
-    echo "gpt prompt not found!"
-    exit 1
-fi
+set -euxo pipefail
 
 dmenucmd='rofi -dmenu'
 question=$(${dmenucmd} -p "🤖 Ask ChatGPT:")
 
-if [ -z "${question}" ]; then
-	exit 1
+if [[ -z "${question}" ]]; then
+    exit 1
 fi
 
-response=$(echo "${question}"|gpt_prompt)
-
-if [ -z "${response}" ]; then
-	exit 1
-fi
+response=$(echo "${question}" | gpt_prompt || { notify-send "No response from ChatGPT!"; exit 1; })
 
 notify-send "${response}"
