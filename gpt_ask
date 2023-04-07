@@ -12,4 +12,3 @@ fi
 response=$(echo "${question}" | gpt_prompt || { notify-send "No response from ChatGPT!"; exit 1; })
 
 notify-send "${response}"
-. shunit2
