@@ -3,43 +3,64 @@
 ## Prompt ChatGPT using openai's API.
 ## reference: https://platform.openai.com/docs/api-reference/completions/
 
+# Set options to control error handling and debugging output
 set -euxo pipefail
 
-prompt_input="${1:-$( < /dev/stdin )}"  ## get args or read stdin.
-prompt_input="${prompt_input@Q}"        ## filter input
+# Get input prompt from command line argument or standard input
+prompt_input="${1:-$( < /dev/stdin )}"  
 
+# Define a function to check environment variables and set up API URL
 checkEnv() {
+    # Define location of OpenAI API key file
     declare -r api_key_file="${HOME}/.api/openai.txt"
-    declare -gr api_key="$(<"${api_key_file}")"
+    # Read the API key from the key file
+    declare -gr api_key="$(cat "${api_key_file}" | head -n1)"
+    # Define the API endpoint for GPT completions
     declare -r api_endpoint='completions'
+    # Construct the complete API URL
     declare -gr api_url="https://api.openai.com/v1/${api_endpoint}"
 }
+# Call the checkEnv function to set up environment variables
 checkEnv
 
+# Define a function to set options for the API request
 promptOpt() {
+    # Define the role and content of the prompt
     declare -r _role_content='You are a helpful assistant, and you provide short and useful answer.'
+    # Set a timeout for the API request
     declare -gr -i request_timeout='30'
-    declare -r response_echo='true'                ## show the prompt in response
-    declare -r prompt_temp='0'                     ## 2 = random, 0 = focused
-    declare -r response_max_tokens='4096'          ## max chars to generate
+    # Whether to include the prompt in the response
+    declare -r response_echo='true'  
+    # The temperature of the response (higher temperature = more creative but less coherent)
+    declare -r prompt_temp='0'    
+    # The maximum number of tokens in the generated response
+    declare -r response_max_tokens='2048' 
+    # The GPT model to be used for generating the response
     declare -r prompt_model='text-davinci-003'
-    declare -gr prompt_request='{"prompt":"'${prompt_input}'","model": "'${prompt_model}'", "temperature": "'${prompt_temp}'", "max_tokens": "'${response_max_tokens}'", "echo": "'${response_echo}'"}'
+    # Combine options into a JSON request string
+    declare -gr prompt_request='{"prompt":"'${prompt_input}'", "model":"'${prompt_model}'", "temperature": '${prompt_temp}', "max_tokens": '${response_max_tokens}', "echo": '${response_echo}'}'
 }
+# Call the promptOpt function to set up request options
 promptOpt
 
+# Send the API request and capture the response
 response=$(\
+    # Use the "timeout" command to limit the time spent waiting for a response from the OpenAI API
+    # and use "curl" to send a POST request to the OpenAI API with the prompt options
     timeout "${request_timeout}"\
-        curl --silent --fail\
+        curl --silent\
             -X POST\
             -H "Content-Type: application/json"\
             -H "Authorization: Bearer ${api_key}"\
             -d "${prompt_request}" "${api_url}"\
 )
 
+# Extract the generated text from the response using "jq"
 response_text=$(\
     echo "${response}"\
         | jq -r '.choices[0].text'\
         | tail -n +3 2>/dev/null\
 )
 
+# Print the generated text to stdout
 printf '%s\n' "${response_text}"
