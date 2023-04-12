@@ -4,7 +4,7 @@
 ## reference: https://platform.openai.com/docs/api-reference/completions/
 
 # Set options to control error handling and debugging output
-set -euxo pipefail
+set -euo pipefail
 
 # Get input prompt from command line argument or standard input
 prompt_input="${1:-$( < /dev/stdin )}"  
