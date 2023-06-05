@@ -1,23 +1,15 @@
 #!/bin/bash
-
-# Set options for script execution
 set -euxo pipefail
 
-# Declare a read-only variable containing the rofi dmenu command
 declare -r dmenucmd='rofi -dmenu'
 
-# Declare a variable for the user's question and prompt them using rofi dmenu
 declare gpt_question
-gpt_question=$(${dmenucmd} -p "🤖 Ask ChatGPT:")
+gpt_question=$(${dmenucmd} -p 'Ask ChatGPT: ')
 
-# Declare a variable for the ChatGPT response, generated using the gpt_prompt command
-# If gpt_prompt fails, display a notification and exit the script
 declare gpt_response
 gpt_response=$(echo "${gpt_question}" | gpt_prompt || { notify-send "No response from ChatGPT!"; exit 1; })
 
-# Declare read-only variables for the app name and notification timeout
 declare -r application_name='ChatGPT'
 declare -i -r notification_timeout='0'
 
-# Display the ChatGPT response as a desktop notification
 notify-send -a "${application_name}" -t "${notification_timeout}" "${gpt_response}"
