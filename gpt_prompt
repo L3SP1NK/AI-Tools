@@ -12,9 +12,11 @@ prompt_input="${1:-$( < /dev/stdin )}"
 # Define a function to check environment variables and set up API URL
 checkEnv() {
     # Define location of OpenAI API key file
-    declare -r api_key_file="${HOME}/.api/openai.txt"
+    declare -Ir api_key_file
+    api_key_file="${HOME}/.api/openai.txt"
     # Read the API key from the key file
-    declare -gr api_key="$(cat "${api_key_file}" | head -n1)"
+    declare -gr api_key
+    api_key="$(head -n1 < "${api_key_file}")"
     # Define the API endpoint for GPT completions
     declare -r api_endpoint='completions'
     # Construct the complete API URL
