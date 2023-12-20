@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euxo pipefail
+
+AI_MODEL='Perplexity'
+MENU_CMD='rofi -dmenu'
+AI_QUESTION=$( ${MENU_CMD} -p 'Ask ${AI_MODEL}: ' )
+AI_REPONSE=$( echo "${AI_QUESTION}" | gpt_prompt || { notify-send -a "${AI_MODEL}" -u critical -e "No response from ${AI_MODEL}"; exit 1; } )
